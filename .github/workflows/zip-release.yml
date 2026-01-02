@@ -71,8 +71,8 @@ jobs:
           let old_tag;
 
           if (tags.data.length === 0) {
-            new_tag = 'v1.0.0';
-            no_prefix = '1.0.0';
+            new_tag = 'v1.7.5';
+            no_prefix = '1.7.5';
           } else {
             const latest = tags.data[0].name.substring(1).split('.').map(Number);
             if (latest[1] === 9 && latest[2] === 9) {
