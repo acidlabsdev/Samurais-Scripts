@@ -1073,7 +1073,7 @@ function GUI:CustomToggle(label, v, opts)
 	end
 
 	if (c and type(callback) == "function") then
-		callback(v)
+		callback(r)
 	end
 
 	return r, c

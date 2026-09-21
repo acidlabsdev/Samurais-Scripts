@@ -61,11 +61,13 @@ function BFD:Toggle()
 end
 
 function BFD:Update()
+	if (GVars.features.vehicle.performance_only and not self.m_entity:IsPerformanceCar()) then
+		return
+	end
+
 	self:Toggle()
 	if (self.m_is_toggled) then
-		if (not GVars.features.vehicle.performance_only or self.m_entity:IsPerformanceCar()) then
-			VEHICLE.SET_VEHICLE_BRAKE_LIGHTS(self.m_entity:GetHandle(), false)
-		end
+		VEHICLE.SET_VEHICLE_BRAKE_LIGHTS(self.m_entity:GetHandle(), false)
 	end
 end
 

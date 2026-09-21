@@ -27,6 +27,7 @@ return {
 	CELL_BUNKER         = "", -- Bunker
 	CELL_ACID_LAB       = "", -- Acid Lab
 	CELL_SLVG_YRD       = "", -- Salvage Yard
+	SALV_DIS_BM1        = "", -- SALVAGE YARD ROBBERY
 	MP_CARWASH          = "", -- Car Wash
 	CELL_16             = "", -- Settings
 	HTITLE_TUT          = "", -- The Fleeca Job
@@ -51,6 +52,7 @@ return {
 	DLCC_HEIST_H        = "", -- Go to dynasty8realestate.com to purchase a high-end Apartment. This property gives you access to a planning room where you can set up and play a series of Heists.
 	GOPS_BASE_HELP      = "", -- Go to foreclosures.maze-bank.com to purchase a Facility. This property gives you access to The Doomsday Heist planning room as a Boss.
 	CH_HLP_2            = "", -- Visit foreclosures.maze-bank.com to view and purchase an Arcade. This gives you access to The Diamond Casino Heist planning area as a Boss.
+	FIX_FLOW_HLP0       = "", -- Go to dynasty8executiverealty.com to purchase a Celebrity Solutions Agency. This property allows you to run a fixer business, accepting Security Contracts to earn legitimate income and investigative work for a VIP client.
 	HIF_SUB_HELP        = "", -- Visit warstock-cache-and-carry.com to purchase a Kosatka submarine. This gives you access to The Cayo Perico Heist as a Boss.
 	K26_FLW_HLP4C       = "", -- Purchase a Mansion with an Art Studio from prixluxuryrealestate.com to gain access to The Kortz Center Heist.
 	K26_FLW_HLP4B       = "", -- Purchase the Art Studio for your Mansion from prixluxuryrealestate.com to gain access to The Kortz Center Heist.

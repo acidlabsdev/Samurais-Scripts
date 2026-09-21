@@ -367,7 +367,7 @@ return {
 		}
 	},
 	K26Data             = {
-		targets = { -- Pair<GXT, BitPos>
+		targets = {
 			"KH_END_TAR0",
 			"KH_END_TAR1",
 			"KH_END_TAR2",
@@ -421,5 +421,5 @@ return {
 			"AWT_972",
 			"AWT_973",
 		}
-	}
+	},
 }

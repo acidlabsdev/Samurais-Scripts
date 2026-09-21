@@ -24,7 +24,7 @@ local GetRunningFmmcScript    = Game.GetRunningFmmcScript
 ---@field private m_running_script ("fm_mission_controller"|"fm_mission_controller_2020"|"fm_mission_controller_v3")?
 ---@field private m_controller_last_tick TimePoint
 ---@field private m_ready boolean
-local HeistEditor   = { m_heists = {} }
+local HeistEditor   = { m_heists = {}, m_jobs = {} }
 HeistEditor.__index = HeistEditor
 
 function HeistEditor:init()
@@ -172,12 +172,11 @@ function HeistEditor:OnTick(s)
 		return
 	end
 
-
 	self.m_running_script = GetRunningFmmcScript()
 	self:TickMVC()
 
 	for _, heist in ipairs(self.m_heists) do
-		heist:OnTick()
+		heist:OnTick(s)
 		s:yield()
 	end
 end

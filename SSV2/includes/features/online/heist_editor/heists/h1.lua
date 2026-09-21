@@ -34,6 +34,7 @@ local heistData <const> = {
 	{ gxt = "HTITLE_ORNATE", int_index = 4, root_data = Pair("MPX_HEIST_SAVED_STRAND_4", tgi("ROOT_ID_HASH_THE_PACIFIC_STANDARD_JOB")) },
 }
 
+
 ---@class ApartmentHeist : Heist
 ---@field private m_content_id_global ScriptGlobal
 ---@field private m_player_cuts Int4
@@ -43,8 +44,8 @@ local heistData <const> = {
 ---@field private m_strand_list array<HeistStrand>
 ---@field public m_none_unlocked boolean
 ---@field public m_current_strand? HeistStrand
-local ApartmentHeist    = setmetatable({}, Heist)
-ApartmentHeist.__index  = ApartmentHeist
+local ApartmentHeist   = setmetatable({}, Heist)
+ApartmentHeist.__index = ApartmentHeist
 
 ---@param apartment BasicProperty
 ---@return ApartmentHeist
@@ -58,12 +59,8 @@ function ApartmentHeist.new(apartment)
 		property_fail_msg = "DLCC_HEIST_H",
 		-- managed_values    = { -- og heists use a bitset global instead. // void func_18392() // Position - 0x5AA1B7 (5939639) Hash - 0xEBC9A1E3 ^0xF86F4BD3
 		-- 	["apartment_heist_cooldown"] = {
-		-- 		get_state = function()
-		-- 			return false
-		-- 		end,
-		-- 		defs = {
-		-- 			-- { t = "MPX_GANGOPS_LAUNCH_TIME", v = Time.Epoch() - 2629743, obj_type = eValueType.STAT, data_type = eDataType.INT },
-		-- 		}
+		-- 		get_state = function() return false end,
+		-- 		defs = {}
 		-- 	}
 		-- }
 	})

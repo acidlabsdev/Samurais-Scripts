@@ -138,7 +138,7 @@ function KortzHeist:UnlockSecondaries()
 	local bs = sgi("MPX_K26_GENERAL_BS")
 	for i = 0, 31 do
 		if (i ~= 28) then
-			bs = Bit.Set(bs, i)
+			bs = bs | (1 << i)
 		end
 	end
 	ssi("MPX_K26_GENERAL_BS", bs)
@@ -178,7 +178,9 @@ function KortzHeist:Reset()
 	for _, pair in ipairs(k26Data.secondary_objectives) do
 		ssi(pair.first, 0)
 	end
+
 	ssi("MPX_K26_GENERAL_BS", 0)
+	self.m_gen_bs_g:ClearBit(28)
 end
 
 return KortzHeist

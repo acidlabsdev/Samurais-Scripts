@@ -29,7 +29,7 @@ local DefaultConfig = Serializer:GetDefaultConfig()
 -- Class: Tab
 --------------------------------------
 ---@ignore
----@class Tab : ClassMeta<Tab>
+---@class Tab : Callable<Tab>
 ---@field private m_name string
 ---@field private m_id joaat_t
 ---@field private m_selected_tab_name string
@@ -39,8 +39,8 @@ local DefaultConfig = Serializer:GetDefaultConfig()
 ---@field private m_has_error boolean
 ---@field private m_traceback string
 ---@field public m_has_translator_label boolean
----@overload fun(name: string, drawable?: GuiCallback, subtabs?: Tab, isTranslatorLabel?: boolean) : Tab
-local Tab = Class("Tab")
+---@overload fun(name: string, callback?: GuiCallback, subtabs?: Tab[], isTranslatorLabel?: boolean) : Tab
+local Tab = Callable("Tab")
 
 ---@param name string
 ---@param callback? GuiCallback
@@ -66,10 +66,7 @@ end
 ---@param isTranslatorLabel? boolean If you want to pass a translator key as the label, provide it as is without the `_T` function and set this to true.
 ---@return Tab
 function Tab:RegisterSubtab(name, callback, subtabs, isTranslatorLabel)
-	assert((type(name) == "string" and #name > 0),
-		"Attempt to register a new tab with no name."
-	)
-
+	assert(string.isvalid(name), "Attempt to register a new tab with no name.")
 	local subtab         = Tab(name, callback, subtabs, isTranslatorLabel)
 	self.m_subtabs[name] = subtab
 	return subtab
@@ -171,7 +168,7 @@ end
 ---@private
 ---@param label string
 ---@param callback function
-function Tab:InjectKeybinds(label, callback)
+function Tab:RegisterKeybind(label, callback)
 	local saved_keybinds   = GVars.quick_toggle_keybinds
 	local default_keybinds = DefaultConfig.quick_toggle_keybinds
 	local toggle_keybind   = saved_keybinds[label] or default_keybinds[label]
@@ -223,7 +220,7 @@ function Tab:AddBoolCommand(label, opts)
 		}
 	)
 
-	local function flip_bool()
+	local function toggle()
 		local v = table.get_nested_value(g_table, gvar_key)
 		v = not v
 		table.set_nested_value(g_table, gvar_key, v)
@@ -237,13 +234,12 @@ function Tab:AddBoolCommand(label, opts)
 		return
 	end
 
-
 	if (CommandExecutor and opts.register_command) then
 		local command_name = label:lower():gsub("%s+", "_")
-		CommandExecutor:RegisterCommand(command_name, flip_bool, meta)
+		CommandExecutor:RegisterCommand(command_name, toggle, meta)
 	end
 
-	self:InjectKeybinds(label, flip_bool)
+	self:RegisterKeybind(label, toggle)
 end
 
 ---@param label string
@@ -262,10 +258,10 @@ function Tab:AddLoopedCommand(label, opts)
 	local suspended_thread = not config_value
 	local thread           = ThreadManager:RegisterLooped(_F("SS_%s", command_name:upper()), opts.callback, { suspended = suspended_thread })
 
-	local function toggle()
+	local function onClick()
 		local v = table.get_nested_value(g_table, gvar_key)
 		local onDisable = opts.on_disable
-		if (table.get_nested_value(g_table, gvar_key)) then
+		if (v) then
 			if thread then thread:Resume() end
 		else
 			if thread then thread:Suspend() end
@@ -283,15 +279,15 @@ function Tab:AddLoopedCommand(label, opts)
 			persistent        = true,
 			tooltip           = meta.description,
 			isTranslatorLabel = opts.translate_label,
-			onClick           = toggle,
+			onClick           = onClick,
 			contextData       = opts.ctx_data
 		}
 	)
 
-	local function flip_bool()
+	local function toggle()
 		local v = table.get_nested_value(g_table, gvar_key)
 		table.set_nested_value(g_table, gvar_key, not v)
-		toggle()
+		onClick()
 	end
 
 	if (type(table.get_nested_value(g_table, gvar_key)) ~= "boolean") then
@@ -299,10 +295,10 @@ function Tab:AddLoopedCommand(label, opts)
 	end
 
 	if (opts.register_command and CommandExecutor) then
-		CommandExecutor:RegisterCommand(command_name, flip_bool, meta)
+		CommandExecutor:RegisterCommand(command_name, toggle, meta)
 	end
 
-	self:InjectKeybinds(label, flip_bool)
+	self:RegisterKeybind(label, toggle)
 end
 
 function Tab:Notify(fmt, ...)
@@ -311,23 +307,24 @@ function Tab:Notify(fmt, ...)
 end
 
 ---@parivate
-function Tab:DrawInternal()
+function Tab:__DrawImpl()
 	if (not self.m_callback) then
 		return
 	end
 
 	if (self.m_has_error) then
-		ImGui.TextColored(0.8, 0.8, 0, 1, _F("Tab '%s' has crashed. Please contact a developer.", self.m_name))
-		if (self.m_traceback) then
+		ImGui.TextColored(0.8, 0.8, 0, 1, _F("Tab '%s' encountered an error. Please contact a developer.", self:GetName()))
+		local trace = self.m_traceback
+		if (trace) then
 			ImGui.Spacing()
 			ImGui.BulletText("Traceback most recent call:") -- not an actual trace because Lua's debug is disabled in this sandbox
 			ImGui.Indent()
 			ImGui.PushTextWrapPos()
-			ImGui.TextColored(1, 0, 0, 1, self.m_traceback)
+			ImGui.TextColored(1, 0, 0, 1, trace)
 			ImGui.PopTextWrapPos()
 			ImGui.Unindent()
 			if (ImGui.Button("Copy Trace")) then
-				ImGui.SetClipboardText(self.m_traceback)
+				ImGui.SetClipboardText(trace)
 			end
 		end
 		return
@@ -335,34 +332,33 @@ function Tab:DrawInternal()
 
 	local ok, err = pcall(self.m_callback)
 	if (not ok) then
-		log.fwarning("[%s]: Callback error: %s", self.m_name, err)
+		log.fwarning("[%s]: Callback error: %s", self:GetName(), err)
 		self.m_has_error = true
 		self.m_traceback = err
-		return
 	end
 end
 
 function Tab:Draw()
 	if (not self:HasSubtabs()) then
-		self:DrawInternal()
+		self:__DrawImpl()
 		return
 	end
 
 	local __next = nil
-	if (ImGui.BeginTabBar("ss_tabs")) then
-		local __label = _F("%s##%d", self:GetName(), self:GetID())
-		if (ImGui.BeginTabItem(__label)) then
-			self:DrawInternal()
+	if (ImGui.BeginTabBar("##ss_tabs")) then
+		local label = _F("%s##%d", self:GetName(), self:GetID())
+		if (ImGui.BeginTabItem(label)) then
+			self:__DrawImpl()
 			ImGui.EndTabItem()
 		end
 
 		for _, tab in pairs(self.m_subtabs) do
-			local label = _F("%s##%d", tab:GetName(), tab:GetID())
-			if (ImGui.BeginTabItem(label)) then
+			local sub_label = _F("%s##%d", tab:GetName(), tab:GetID())
+			if (ImGui.BeginTabItem(sub_label)) then
 				if (tab:HasSubtabs()) then
 					__next = tab
 				else
-					tab:DrawInternal()
+					tab:__DrawImpl()
 				end
 				ImGui.EndTabItem()
 			end
@@ -370,7 +366,9 @@ function Tab:Draw()
 		ImGui.EndTabBar()
 	end
 
-	if (__next) then __next:Draw() end
+	if (__next) then
+		__next:Draw()
+	end
 end
 
 return Tab

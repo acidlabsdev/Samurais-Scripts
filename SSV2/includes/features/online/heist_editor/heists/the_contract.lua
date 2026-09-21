@@ -22,13 +22,13 @@ Translator:TranslateGXTList(missionData.missions)
 local TheContract   = setmetatable({}, Heist)
 TheContract.__index = TheContract
 
----@param apartment BasicProperty
+---@param agency BasicProperty
 ---@return TheContract
-function TheContract.new(apartment)
+function TheContract.new(agency)
 	local base = Heist.new({
 		name              = "FIX_APP_VIP_TU",
 		script_name       = "fm_mission_controller_2020",
-		property          = apartment,
+		property          = agency,
 		requires_property = true,
 		boost_bit         = 9,
 		gui_callback      = require("includes.frontend.heist_editor.heists.the_contract_ui"),

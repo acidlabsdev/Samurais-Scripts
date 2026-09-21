@@ -7,7 +7,26 @@
 --	* Provide a copy of or a link to the original license (GPL-3.0 or later); see LICENSE.md or <https://www.gnu.org/licenses/>.
 
 
-require("includes.lib.callable")
+---@class Keybinding
+---@field public key GenericKey
+---@field public modifier GenericKey?
+
+---@class KeybindMeta
+---@field name string
+---@field keyboard_binding Keybinding
+---@field controller_binding Keybinding
+---@field is_exclusive boolean
+---@field repeat_on_hold boolean
+---@field allow_unbind boolean
+---@field no_gamepad boolean
+
+---@class KeybindKeywordArgs
+---@field callback function?
+---@field repeat_on_hold boolean?
+---@field is_exclusive boolean?
+---@field allow_unbind boolean?
+---@field no_gamepad boolean?
+
 
 local REF_COUNT                         = 0
 local joaat                             = _G.joaat
@@ -74,38 +93,18 @@ local function isGenericKeyJustReleased(code, is_controller)
 	return KeyManager:IsKeyJustReleased(code)
 end
 
-
----@class Keybinding
----@field public key GenericKey
----@field public modifier GenericKey?
-
----@class KeybindMeta
----@field name string
----@field keyboard_binding Keybinding
----@field controller_binding Keybinding
----@field is_exclusive boolean
----@field repeat_on_hold boolean
----@field allow_unbind boolean
-
----@class KeybindKeywordArgs
----@field callback function?
----@field repeat_on_hold boolean?
----@field is_exclusive boolean?
----@field allow_unbind boolean?
----@field no_gamepad boolean?
-
 ---@return GenericKey
 local function newGenericKey()
 	return { name = "Unbound", code = 0 }
 end
 
 ---@return Keybinding
-local function newUnBoundKey()
-	return { key = newGenericKey(), }
+local function dummyKeybinding()
+	return { key = newGenericKey(), modifier = newGenericKey() }
 end
 
 
----@class Keybind : Callable<Keybind>
+---@class Keybind
 ---@field private m_name string this is usually the toggle or feature or whatever's name
 ---@field private m_keyboard_binding Keybinding
 ---@field private m_controller_binding Keybinding
@@ -131,8 +130,8 @@ function Keybind:new(name, keys, kwargs)
 	if (not keyboard and not controller and not no_gamepad) then
 		Backend:debug("[Keybind]: Attempt to create a keybind with no keys. Falling back to dummies.")
 	end
-	keyboard           = keyboard or newUnBoundKey()
-	controller         = controller or newUnBoundKey()
+	keyboard           = keyboard or dummyKeybinding()
+	controller         = controller or dummyKeybinding()
 
 	local allow_unbind = kwargs.allow_unbind
 	if (allow_unbind == nil) then
@@ -155,8 +154,8 @@ end
 ---@param name string
 function Keybind.MakeDummy(name)
 	return Keybind:new(name, {
-		keyboard_binding   = newUnBoundKey(),
-		controller_binding = newUnBoundKey()
+		keyboard_binding   = dummyKeybinding(),
+		controller_binding = dummyKeybinding()
 	})
 end
 
@@ -170,10 +169,7 @@ end
 function Keybind:IsDummy()
 	local keyboard   = self.m_keyboard_binding
 	local controller = self.m_controller_binding
-	return keyboard.key.code == 0
-		and controller.key.code == 0
-		and keyboard.key.name == "Unbound"
-		and controller.key.name == "Unbound"
+	return keyboard.key.code == 0 and controller.key.code == 0
 end
 
 ---@return boolean
@@ -273,11 +269,11 @@ function Keybind:SetKeysFrom(other)
 end
 
 function Keybind:ClearKeyboardBinding()
-	self.m_keyboard_binding = newUnBoundKey()
+	self.m_keyboard_binding = dummyKeybinding()
 end
 
 function Keybind:ClearControllerBinding()
-	self.m_controller_binding = newUnBoundKey()
+	self.m_controller_binding = dummyKeybinding()
 end
 
 function Keybind:Unbind()
@@ -406,6 +402,7 @@ function Keybind:serialize()
 		is_exclusive       = self.m_is_exclusive or false,
 		repeat_on_hold     = self.m_repeat_on_hold or false,
 		allow_unbind       = self.m_allow_unbind or false,
+		no_gamepad         = self.m_no_gamepad or false,
 		__type             = "Keybind"
 	}
 end
@@ -420,7 +417,8 @@ function Keybind.deserialize(data)
 		{
 			is_exclusive   = data.is_exclusive or false,
 			repeat_on_hold = data.repeat_on_hold or false,
-			allow_unbind   = data.allow_unbind or false
+			allow_unbind   = data.allow_unbind or false,
+			no_gamepad     = data.no_gamepad or false
 		})
 end
 

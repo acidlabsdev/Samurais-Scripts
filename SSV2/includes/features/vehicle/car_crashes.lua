@@ -170,9 +170,9 @@ function CarCrash:OnCollision(levelName, vehicle)
 	local occupants = self.m_entity:GetOccupants()
 	if (#occupants > 0) then
 		for _, ped in ipairs(occupants) do
-			-- if (PED.IS_PED_A_PLAYER(ped) and ped ~= LocalPlayer:GetHandle()) then -- nah, kill players too.
-			-- 	goto continue
-			-- end
+			if (PED.IS_PED_A_PLAYER(ped) and ped ~= LocalPlayer:GetHandle()) then
+				goto continue
+			end
 
 			if (lvl.kill) then
 				ENTITY.SET_ENTITY_HEALTH(ped, 0, 0, 0)
@@ -180,7 +180,7 @@ function CarCrash:OnCollision(levelName, vehicle)
 				ENTITY.SET_ENTITY_HEALTH(ped, math.max(0, ENTITY.GET_ENTITY_HEALTH(ped) - lvl.healthDamage), 0, 0)
 			end
 
-			-- ::continue::
+			::continue::
 		end
 	end
 
@@ -202,8 +202,9 @@ function CarCrash:OnCollision(levelName, vehicle)
 end
 
 function CarCrash:OnTick()
+	yield()
+
 	if (not self:ShouldRun()) then
-		sleep(1000)
 		return
 	end
 
@@ -214,14 +215,15 @@ function CarCrash:OnTick()
 
 	local handle   = PV:GetHandle()
 	local speed    = PV:GetSpeed()
+	local levels   = self.m_crash_levels
 	local levelKey = "minor"
 
 	PV:ApplyPatch(PV.MemoryPatches.DeformMult)
-	CAM.SHAKE_GAMEPLAY_CAM("GRENADE_EXPLOSION_SHAKE", speed / 30)
+	CAM.SHAKE_GAMEPLAY_CAM("GRENADE_EXPLOSION_SHAKE", speed / 25)
 
-	if (speed >= self.m_crash_levels.major.threshold()) then
+	if (speed >= levels.major.threshold()) then
 		local initial_speed = speed
-		sleep(100)
+		sleep(150)
 		local current_speed = PV:GetSpeed()
 
 		if (current_speed <= (initial_speed * 0.8) and current_speed > (initial_speed / 5)) then
@@ -229,7 +231,7 @@ function CarCrash:OnTick()
 		elseif (current_speed <= (initial_speed / 5)) then
 			levelKey = "fatal"
 		end
-	elseif (speed >= self.m_crash_levels.minor.threshold()) then
+	elseif (speed >= levels.minor.threshold()) then
 		levelKey = "minor"
 	end
 

@@ -184,7 +184,8 @@ function Heist:RegisterManagedValues(controller)
 	end
 end
 
-function Heist:OnTick()
+---@param s script_util
+function Heist:OnTick(s)
 	if (not self.m_is_active and self:IsRunning()) then
 		self.m_is_active = true
 	end
@@ -192,7 +193,12 @@ function Heist:OnTick()
 	if (self.m_is_active and not self:IsRunning()) then
 		self.m_is_active = false
 		self:Init()
-		sleep(3000)
+		s:sleep(3000)
+	end
+
+	local tickFunc = self.Update
+	if (tickFunc) then
+		tickFunc(self)
 	end
 end
 
