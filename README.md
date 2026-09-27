@@ -7,7 +7,7 @@
     <img alt="License" src="https://img.shields.io/badge/License-GPL--3.0-white?style=plastic">
   </a>
   <a href="https://github.com/YimMenu-Lua/Samurais-Scripts/releases/latest">
-    <img alt="Latest Release" src="https://img.shields.io/badge/Latest%20Release-v2.0.1-blue?style=plastic">
+    <img alt="Latest Release" src="https://img.shields.io/badge/Latest%20Release-v2.0.2-blue?style=plastic">
   </a>
   <a href="https://github.com/YimMenu-Lua/Samurais-Scripts/issues">
     <img alt="Issues" src="https://img.shields.io/github/issues/YimMenu-Lua/Samurais-Scripts?style=plastic">
@@ -26,7 +26,7 @@
     <img alt="Legacy Build" src="https://img.shields.io/badge/Legacy-3889.0-green?style=for-the-badge">
   </a>
   <a href="https://github.com/YimMenu-Lua/Samurais-Scripts">
-    <img alt="Enhanced Build" src="https://img.shields.io/badge/Enhanced-1158.13-green?style=for-the-badge">
+    <img alt="Enhanced Build" src="https://img.shields.io/badge/Enhanced-1158.16-green?style=for-the-badge">
   </a>
 </div><br><br>
 
